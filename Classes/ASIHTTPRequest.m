@@ -4826,7 +4826,8 @@ static NSOperationQueue *sharedQueue = nil;
 	if ([[string componentsSeparatedByString:@":"] count] == 3) {
 		seconds = @":ss";
 	}
-	[formatter setDateFormat:[NSString stringWithFormat:@"%@dd MMM yyyy HH:mm%@ z",day,seconds]];
+	[formatter setDateFormat:[NSString stringWithFormat:@"%@dd MMM yyyy HH:mm%@",day,seconds]];
+	[formatter setTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
 	return [formatter dateFromString:string];
 }
 
