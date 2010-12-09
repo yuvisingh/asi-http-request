@@ -23,6 +23,7 @@
 #import "ASIDataDecompressor.h"
 #import "ASIDataCompressor.h"
 
+
 // Automatically set on build
 NSString *ASIHTTPRequestVersion = @"v1.8-14 2010-12-02";
 
@@ -31,6 +32,8 @@ NSString* const NetworkRequestErrorDomain = @"ASIHTTPRequestErrorDomain";
 static NSString *ASIHTTPRequestRunLoopMode = @"ASIHTTPRequestRunLoopMode";
 
 static const CFOptionFlags kNetworkEvents =  kCFStreamEventHasBytesAvailable | kCFStreamEventEndEncountered | kCFStreamEventErrorOccurred;
+
+static NSString *gUserAgentString;
 
 // In memory caches of credentials, used on when useSessionPersistence is YES
 static NSMutableArray *sessionCredentialsStore = nil;
@@ -3856,7 +3859,11 @@ static NSOperationQueue *sharedQueue = nil;
 
 + (NSString *)defaultUserAgentString
 {
-	NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+	if(gUserAgentString){
+        return gUserAgentString;
+    }
+    
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
 
 	// Attempt to find a name for this application
 	NSString *appName = [bundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
@@ -3911,7 +3918,9 @@ static NSOperationQueue *sharedQueue = nil;
 	
 #endif
 	// Takes the form "My Application 1.0 (Macintosh; Mac OS X 10.5.7; en_GB)"
-	return [NSString stringWithFormat:@"%@ %@ (%@; %@ %@; %@)", appName, appVersion, deviceName, OSName, OSVersion, locale];
+	gUserAgentString = [NSString stringWithFormat:@"%@ %@ (%@; %@ %@; %@)", appName, appVersion, deviceName, OSName, OSVersion, locale];
+    [gUserAgentString retain];
+    return gUserAgentString;
 }
 
 #pragma mark proxy autoconfiguration
