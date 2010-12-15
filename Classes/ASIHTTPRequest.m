@@ -25,7 +25,7 @@
 
 
 // Automatically set on build
-NSString *ASIHTTPRequestVersion = @"v1.8-14 2010-12-02";
+NSString *ASIHTTPRequestVersion = @"v1.8-26 2010-12-15";
 
 NSString* const NetworkRequestErrorDomain = @"ASIHTTPRequestErrorDomain";
 
@@ -165,6 +165,8 @@ static NSOperationQueue *sharedQueue = nil;
 - (void)startRequest;
 - (void)updateStatus:(NSTimer *)timer;
 - (void)checkRequestStatus;
+- (void)reportFailure;
+- (void)reportFinished;
 - (void)markAsFinished;
 - (void)performRedirect;
 - (BOOL)shouldTimeOut;
@@ -1933,7 +1935,6 @@ static NSOperationQueue *sharedQueue = nil;
 	}
 }
 
-/* ALWAYS CALLED ON MAIN THREAD! */
 // Subclasses might override this method to process the result in the same thread
 // If you do this, don't forget to call [super requestFinished] to let the queue / delegate know we're done
 - (void)requestFinished
@@ -1944,18 +1945,23 @@ static NSOperationQueue *sharedQueue = nil;
 	if ([self error] || [self mainRequest]) {
 		return;
 	}
+	[self performSelectorOnMainThread:@selector(reportFinished) withObject:nil waitUntilDone:[NSThread isMainThread]];
+}
 
+/* ALWAYS CALLED ON MAIN THREAD! */
+- (void)reportFinished
+{
 	if (delegate && [delegate respondsToSelector:didFinishSelector]) {
 		[delegate performSelector:didFinishSelector withObject:self];
 	}
 	if (queue && [queue respondsToSelector:@selector(requestFinished:)]) {
 		[queue performSelector:@selector(requestFinished:) withObject:self];
 	}
-	#if NS_BLOCKS_AVAILABLE
+#if NS_BLOCKS_AVAILABLE
 	if(completionBlock){
 		completionBlock();
 	}
-	#endif
+#endif
 }
 
 /* ALWAYS CALLED ON MAIN THREAD! */
@@ -2921,13 +2927,16 @@ static NSOperationQueue *sharedQueue = nil;
 
 - (void)handleNetworkEvent:(CFStreamEventType)type
 {	
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
 	[[self cancelledLock] lock];
 	
 	if ([self complete] || [self isCancelled]) {
 		[[self cancelledLock] unlock];
+		[pool release];
 		return;
 	}
-	
+
 	CFRetain(self);
 
     // Dispatch the stream events.
@@ -2976,6 +2985,7 @@ static NSOperationQueue *sharedQueue = nil;
 	}
 
 	CFRelease(self);
+	[pool release];
 }
 
 - (void)handleBytesAvailable
@@ -3244,7 +3254,7 @@ static NSOperationQueue *sharedQueue = nil;
 		if (fileError) {
 			[self failWithError:fileError];
 		} else {
-			[self performSelectorOnMainThread:@selector(requestFinished) withObject:nil waitUntilDone:[NSThread isMainThread]];
+			[self requestFinished];
 		}
 
 		[self markAsFinished];
@@ -3343,7 +3353,7 @@ static NSOperationQueue *sharedQueue = nil;
 	}
 
 	[theRequest updateProgressIndicators];
-	[theRequest performSelectorOnMainThread:@selector(requestFinished) withObject:nil waitUntilDone:[NSThread isMainThread]];
+	[theRequest requestFinished];
 	[theRequest markAsFinished];	
 	if ([self mainRequest]) {
 		[self markAsFinished];

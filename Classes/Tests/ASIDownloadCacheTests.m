@@ -128,12 +128,12 @@
 
 	// Test ASIFallbackToCacheIfLoadFailsCachePolicy
 	// Store something in the cache
-	[request setURL:[NSURL URLWithString:@"http://inva.lid"]];
+	[request setURL:[NSURL URLWithString:@"http://"]];
 	[request setResponseHeaders:[NSDictionary dictionaryWithObject:@"test" forKey:@"test"]];
 	[request setRawResponseData:(NSMutableData *)[@"test" dataUsingEncoding:NSUTF8StringEncoding]];
 	[[ASIDownloadCache sharedCache] storeResponseForRequest:request maxAge:0];
 
-	request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://inva.lid"]];
+	request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://"]];
 	[request setCachePolicy:ASIFallbackToCacheIfLoadFailsCachePolicy];
 	[request startSynchronous];
 
@@ -235,6 +235,21 @@
 		BOOL success = ![request didUseCachedResponse];
 		GHAssertTrue(success,@"Cached data should have expired");
 	}
+}
+
+- (void)testMaxAgeParsing
+{
+	[[ASIDownloadCache sharedCache] clearCachedResponsesForStoragePolicy:ASICacheForSessionDurationCacheStoragePolicy];
+	[[ASIDownloadCache sharedCache] setDefaultCachePolicy:ASIUseDefaultCachePolicy];
+	ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://allseeing-i.com/ASIHTTPRequest/tests/cache-control-max-age-parsing"]];
+	[request setDownloadCache:[ASIDownloadCache sharedCache]];
+	[request startSynchronous];
+
+	request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://allseeing-i.com/ASIHTTPRequest/tests/cache-control-max-age-parsing"]];
+	[request setDownloadCache:[ASIDownloadCache sharedCache]];
+	[request startSynchronous];
+	BOOL success = [request didUseCachedResponse];
+	GHAssertTrue(success,@"Failed to use cached response");
 }
 
 - (void)testCustomExpiry
