@@ -155,16 +155,9 @@ static NSString *permanentCacheFolder = @"PermanentStore";
 
 	NSFileManager *fileManager = [[[NSFileManager alloc] init] autorelease];
 
-	// Look in the session store
-	NSString *path = [[self storagePath] stringByAppendingPathComponent:sessionCacheFolder];
-	NSString *dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:extension]];
-	if ([fileManager fileExistsAtPath:dataPath]) {
-		[[self accessLock] unlock];
-		return dataPath;
-	}
 	// Look in the permanent store
-	path = [[self storagePath] stringByAppendingPathComponent:permanentCacheFolder];
-	dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:extension]];
+	NSString *path = [[self storagePath] stringByAppendingPathComponent:permanentCacheFolder];
+	NSString *dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:extension]];
 	if ([fileManager fileExistsAtPath:dataPath]) {
 		[[self accessLock] unlock];
 		return dataPath;
@@ -183,16 +176,9 @@ static NSString *permanentCacheFolder = @"PermanentStore";
 
 	NSFileManager *fileManager = [[[NSFileManager alloc] init] autorelease];
 
-	// Look in the session store
-	NSString *path = [[self storagePath] stringByAppendingPathComponent:sessionCacheFolder];
-	NSString *dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:@"cachedheaders"]];
-	if ([fileManager fileExistsAtPath:dataPath]) {
-		[[self accessLock] unlock];
-		return dataPath;
-	}
 	// Look in the permanent store
-	path = [[self storagePath] stringByAppendingPathComponent:permanentCacheFolder];
-	dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:@"cachedheaders"]];
+	NSString *path = [[self storagePath] stringByAppendingPathComponent:permanentCacheFolder];
+	NSString *dataPath = [path stringByAppendingPathComponent:[[[self class] keyForURL:url] stringByAppendingPathExtension:@"cachedheaders"]];
 	if ([fileManager fileExistsAtPath:dataPath]) {
 		[[self accessLock] unlock];
 		return dataPath;
