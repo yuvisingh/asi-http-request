@@ -16,7 +16,6 @@ static NSString *sessionCacheFolder = @"SessionStore";
 static NSString *permanentCacheFolder = @"PermanentStore";
 
 @interface ASIDownloadCache ()
-+ (NSString *)keyForURL:(NSURL *)url;
 @end
 
 @implementation ASIDownloadCache

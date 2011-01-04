@@ -40,6 +40,8 @@
 // Do not use this formatter for parsing dates because the format can vary slightly - use ASIHTTPRequest's dateFromRFC1123String: class method instead
 + (NSDateFormatter *)rfc1123DateFormatter;
 
++ (NSString *)keyForURL:(NSURL *)url;
+
 @property (assign, nonatomic) ASICachePolicy defaultCachePolicy;
 @property (retain, nonatomic) NSString *storagePath;
 @property (retain) NSRecursiveLock *accessLock;
